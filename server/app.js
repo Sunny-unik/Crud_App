@@ -3,11 +3,13 @@ const cors = require('cors');
 const Mongoclient = require('mongodb').MongoClient;
 const ObjectId = require('mongodb').ObjectId;
 const bodyParser = require('body-parser');
+const upload = require('./multerConfig');
 const path = require('path');
 require('dotenv').config();
 
 const app = express();
 app.use(cors());
+app.use(express.static(path.join(__dirname, "userProfiles")));
 
 const client = new Mongoclient(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 let connection;
@@ -57,15 +59,20 @@ app.post("/create-student", bodyParser.json(), (req, res) => {
   });
 });
 
-app.post("/update-student",bodyParser.json(), (req,res)=>{
-  console.log("hey", res);
-  const studentCollection = connection.db('school').collection('student');
-  studentCollection.updateOne({_id:ObjectId(req.body.id)},{$set:{name: req.body.name, age: req.body.age, email: req.body.email, marks: req.body.marks, city: req.body.city}},(err,result)=>{
-    !err
-      ? res.send({status:"ok",data:"data updated successfully"})
-      : res.send({status:"failed",data:err})
-  })
-})
+app.post("/update-student", bodyParser.json(), (req, res) => {
+  upload(req, res, (err) => {
+    if (!err) {
+      const studentCollection = connection.db('school').collection('student');
+      studentCollection.updateOne({ _id: ObjectId(req.body.id) }, { $set: { profile: req.files.profile[0].filename, name: req.body.name, age: req.body.age, email: req.body.email, marks: req.body.marks, city: req.body.city } }, (err, result) => {
+        !err 
+          ? res.send({ status: "ok", data: "student updated successfully" })
+          : res.send({ status: "failed", data: err });
+      });
+    } else {
+      res.send({ status: "failed", data: err });
+    }
+  });
+});
 
 const port = process.env.PORT;
 app.listen(port, () => console.log(`Server live on http://localhost:${port}`));
