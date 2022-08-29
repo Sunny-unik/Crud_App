@@ -1,6 +1,6 @@
 import React from 'react'
 
-export default function ListStudent() {
+export default function ListStudents() {
   return (
     <div>ListStudent</div>
   )
