@@ -1,4 +1,3 @@
-/* eslint-disable react/react-in-jsx-scope */
 import "./App.css";
 import React from "react";
 import Home from "./components/Home";

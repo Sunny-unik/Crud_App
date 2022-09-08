@@ -1,3 +1,25 @@
 .content-area {
   min-height: 82vh;
 }
+
+/* Student table */
+.card-body {
+  max-width: 100%;
+  overflow-x: scroll;
+}
+#datatablesSimple {
+  border-spacing: 10px;
+  width: 100%;
+}
+.user-profile {
+  border-radius: 4%;
+}
+.table-head {
+  width: 100%;
+}
+.table-body {
+  width: 100%;
+}
+.table-foot {
+  width: 100%;
+}
