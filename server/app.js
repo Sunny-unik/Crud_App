@@ -37,7 +37,7 @@ app.get("/student-by-id", (req, res) => {
   });
 });
 
-app.get("/list-student", (req, res) => {
+app.get("/list-students", (req, res) => {
   const studentcollection = connection.db("school").collection("student");
   studentcollection.find().toArray((err, docs) => {
     if (!err) {

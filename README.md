@@ -64,3 +64,9 @@ To learn React, check out the [React documentation](https://reactjs.org/).
 
 &nbsp;&nbsp;&nbsp; MONGO_URI = mongodb_uri \
 &nbsp;&nbsp;&nbsp; PORT = port
+
+### - For start server
+
+&nbsp;&nbsp;&nbsp; You have to install sever side dependencies by running command `npm install` inside server directory
+\
+&nbsp;&nbsp;&nbsp; then run `npm run start` command for start server
