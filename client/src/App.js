@@ -6,6 +6,7 @@ import { NavLink, Route, Switch } from "react-router-dom";
 import CreateStudent from "./components/CreateStudent";
 import ListStudents from "./components/ListStudents";
 import Footer from "./components/Footer";
+import NotFound from "./components/NotFound";
 
 function App() {
   return (
@@ -32,7 +33,7 @@ function App() {
           <div className="collapse navbar-collapse" id="navbarTogglerDemo01">
             <ul className="navbar-nav w-100 px-lg-5 text-center bg-dark me-auto my-2 my-lg-0 justify-content-end">
               <li className="nav-item">
-                <NavLink className="nav-link" to="/list-student">
+                <NavLink className="nav-link" to="/list-students">
                   <i className="fas fa-chart-area"></i> List Students
                 </NavLink>
               </li>
@@ -47,9 +48,10 @@ function App() {
         <main className="content-area">
           <Switch>
             <Route path="/" exact component={Home} />
-            <Route path="/list-student" component={ListStudents} />
+            <Route path="/list-students" component={ListStudents} />
             <Route path="/create-student/:id" component={CreateStudent} />
             <Route path="/create-student" component={CreateStudent} />
+            <Route path="/*" component={NotFound} />
           </Switch>
         </main>
         <Footer />

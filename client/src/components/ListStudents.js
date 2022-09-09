@@ -7,7 +7,7 @@ export default function ListStundents(props) {
 
   useEffect(() => {
     axios
-      .get(process.env.REACT_APP_API_URL + "/list-student")
+      .get(process.env.REACT_APP_API_URL + "/list-students")
       .then(res => setstudents(res.data.data));
   }, []);
 
@@ -26,7 +26,7 @@ export default function ListStundents(props) {
         .then(res => alert(res.data.data));
 
       axios
-        .get(process.env.REACT_APP_API_URL + "/list-student")
+        .get(process.env.REACT_APP_API_URL + "/list-students")
         .then(res => setstudents(res.data.data));
     }
   }
