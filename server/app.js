@@ -6,6 +6,7 @@ const bodyParser = require("body-parser");
 const upload = require("./multerConfig");
 const path = require("path");
 const env = require("dotenv").config();
+const fs = require("fs");
 
 const app = express();
 app.use(cors());
@@ -71,9 +72,12 @@ app.post("/create-student", bodyParser.json(), (req, res) => {
 });
 
 app.post("/update-student", bodyParser.json(), (req, res) => {
-  upload(req, res, (err) => {
+  upload(req, res, async (err) => {
     if (!err) {
       const studentcollection = connection.db("school").collection("student");
+      const oldData = await studentcollection.findOne({
+        _id: ObjectId(req.body._id),
+      });
       studentcollection.updateOne(
         { _id: ObjectId(req.body._id) },
         {
@@ -87,9 +91,18 @@ app.post("/update-student", bodyParser.json(), (req, res) => {
           },
         },
         (err, result) => {
-          !err
-            ? res.send({ status: "ok", data: "Student's data updated successfully" })
-            : res.send({ status: "failed", data: err });
+          if (!err) {
+            res.send({ status: "ok", data: "Student's data updated successfully" });
+            const oldImageName = oldData.profile;
+            try {
+              fs.unlinkSync(`${__dirname}/userProfiles/${oldImageName}`);
+              console.log(oldImageName + " deleted successfully");
+            } catch (error) {
+              console.log("delete error", error);
+            }
+          } else {
+            res.send({ status: "failed", data: err });
+          }
         }
       );
     } else {

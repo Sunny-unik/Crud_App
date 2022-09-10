@@ -80,7 +80,7 @@ export default function CreateStudent(props) {
       .post(process.env.REACT_APP_API_URL + "/update-student", formData, {
         headers: { "Content-Type": "multipart/form-data" },
         onUploadProgress: function(progressEvent) {
-          console.log("file Uploading Progresss....... ", progressEvent);
+          // console.log("file Uploading Progresss....... ", progressEvent);
           setuploadPercentage(
             parseInt(
               Math.round((progressEvent.loaded / progressEvent.total) * 100)
