@@ -72,7 +72,11 @@ export default function CreateStudent(props) {
     formData.append("profile", profile);
 
     if (formData.get("profile") === "undefined") {
-      alert("Please select a profile image");
+      const studentObj = { id: studentId, name, city, marks, age, email };
+      axios
+        .post(process.env.REACT_APP_API_URL + "/short-update", studentObj)
+        .then(res => console.log(res.data.data))
+        .catch(err => console.log(err));
       return false;
     }
 
@@ -89,11 +93,10 @@ export default function CreateStudent(props) {
           //setfileInProgress(progressEvent.fileName)
         }
       })
-      .then(res => {
-        alert(res.data.data);
-      })
-      .catch(res => {
+      .then(res => alert(res.data.data))
+      .catch(err => {
         alert("Sorry, server side error occurred");
+        console.log(err);
       });
   }
 
@@ -102,15 +105,13 @@ export default function CreateStudent(props) {
       updateStudent();
       return false;
     }
-
     const studentObj = { name, age, email, marks, city };
     axios
       .post(process.env.REACT_APP_API_URL + "/create-student", studentObj)
-      .then(res => {
-        alert("Student Created Successfully");
-      })
-      .catch(res => {
-        alert(res.data.data);
+      .then(res => alert("Student Created Successfully"))
+      .catch(err => {
+        alert(err);
+        console.log(err);
       });
   }
 

@@ -5,8 +5,8 @@ const ObjectId = require("mongodb").ObjectId;
 const bodyParser = require("body-parser");
 const upload = require("./multerConfig");
 const path = require("path");
-const env = require("dotenv").config();
 const fs = require("fs");
+require("dotenv").config();
 
 const app = express();
 app.use(cors());
@@ -14,7 +14,7 @@ app.use(express.static(path.join(__dirname, "userProfiles")));
 
 const client = new Mongoclient(process.env.MONGO_URI, {
   useNewUrlParser: true,
-  useUnifiedTopology: true,
+  useUnifiedTopology: true
 });
 let connection;
 
@@ -71,12 +71,35 @@ app.post("/create-student", bodyParser.json(), (req, res) => {
   });
 });
 
+app.post("/short-update", bodyParser.json(), (req, res) => {
+  const studentcollection = connection.db("school").collection("student");
+  studentcollection.updateOne(
+    { _id: ObjectId(req.body.id) },
+    {
+      $set: {
+        name: req.body.name,
+        age: req.body.age,
+        email: req.body.email,
+        marks: req.body.marks,
+        city: req.body.city
+      }
+    },
+    (err, result) => {
+      if (err) {
+        res.send({ status: "failed", data: err });
+      } else {
+        res.send({ status: "ok", data: "students's data updated successfully" });
+      }
+    }
+  );
+});
+
 app.post("/update-student", bodyParser.json(), (req, res) => {
   upload(req, res, async (err) => {
     if (!err) {
       const studentcollection = connection.db("school").collection("student");
       const oldData = await studentcollection.findOne({
-        _id: ObjectId(req.body._id),
+        _id: ObjectId(req.body._id)
       });
       studentcollection.updateOne(
         { _id: ObjectId(req.body._id) },
@@ -87,8 +110,8 @@ app.post("/update-student", bodyParser.json(), (req, res) => {
             age: req.body.age,
             email: req.body.email,
             marks: req.body.marks,
-            city: req.body.city,
-          },
+            city: req.body.city
+          }
         },
         (err, result) => {
           if (!err) {
