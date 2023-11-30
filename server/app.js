@@ -31,22 +31,14 @@ client.connect((err, connection) => {
 app.get("/student-by-id", (req, res) => {
   const studentCollection = database.collection("student");
   studentCollection.findOne({ _id: ObjectId(req.query.id) }, (err, docs) => {
-    if (!err) {
-      res.send({ status: "ok", data: docs });
-    } else {
-      res.send({ status: "failed", data: err });
-    }
+    res.send(!err ? { status: "ok", data: docs } : { status: "failed", data: err });
   });
 });
 
 app.get("/list-students", (req, res) => {
   const studentCollection = database.collection("student");
   studentCollection.find().toArray((err, docs) => {
-    if (!err) {
-      res.send({ status: "ok", data: docs });
-    } else {
-      res.send({ status: "failed", data: err });
-    }
+    res.send(!err ? { status: "ok", data: docs } : { status: "failed", data: err });
   });
 });
 
@@ -63,75 +55,56 @@ app.get("/delete-student", (req, res) => {
 
 app.post("/create-student", (req, res) => {
   const studentCollection = database.collection("student");
-  studentCollection.insertOne(req.body, (err, result) => {
-    if (!err) {
-      res.send({ status: "ok", data: "Student's data created successfully" });
-    } else {
-      res.send({ status: "failed", data: err });
-    }
+  studentCollection.insertOne(req.body, (err) => {
+    if (!err)
+      return res.send({ status: "ok", data: "Student's data created successfully" });
+    res.send({ status: "failed", data: err });
   });
 });
 
 app.post("/short-update", (req, res) => {
   const studentCollection = database.collection("student");
+  const { id, name, email, age, marks, city } = req.body;
   studentCollection.updateOne(
-    { _id: ObjectId(req.body.id) },
-    {
-      $set: {
-        name: req.body.name,
-        age: req.body.age,
-        email: req.body.email,
-        marks: req.body.marks,
-        city: req.body.city
-      }
-    },
-    (err, result) => {
-      if (err) {
-        res.send({ status: "failed", data: err });
-      } else {
-        res.send({ status: "ok", data: "students's data updated successfully" });
-      }
+    { _id: ObjectId(id) },
+    { $set: { name, age, email, marks, city } },
+    (err) => {
+      if (err) return res.send({ status: "failed", data: err });
+      res.send({ status: "ok", data: "students's data updated successfully" });
     }
   );
 });
 
 app.post("/update-student", (req, res) => {
   upload(req, res, async (err) => {
-    if (!err) {
-      const studentCollection = database.collection("student");
-      const oldData = await studentCollection.findOne({
-        _id: ObjectId(req.body._id)
-      });
-      studentCollection.updateOne(
-        { _id: ObjectId(req.body._id) },
-        {
-          $set: {
-            profile: req.files.profile[0].filename,
-            name: req.body.name,
-            age: req.body.age,
-            email: req.body.email,
-            marks: req.body.marks,
-            city: req.body.city
-          }
-        },
-        (err, result) => {
-          if (!err) {
-            res.send({ status: "ok", data: "Student's data updated successfully" });
-            const oldImageName = oldData.profile;
-            try {
-              fs.unlinkSync(`${__dirname}/userProfiles/${oldImageName}`);
-              console.log(oldImageName + " deleted successfully");
-            } catch (error) {
-              console.log("delete error", error);
-            }
-          } else {
-            res.send({ status: "failed", data: err });
-          }
-        }
-      );
-    } else {
-      res.send({ status: "failed", data: err });
+    if (err) return res.status(503).send({ status: "failed", data: err });
+    const studentCollection = database.collection("student");
+    const { _id, name, email, age, marks, city } = req.body;
+    const profile = req.files.profile[0].filename;
+    let oldData;
+    try {
+      // getting oldData for remove older image from server files
+      oldData = await studentCollection.findOne({ _id: ObjectId(_id) });
+    } catch (error) {
+      console.log(error);
+      return res.send({ status: "failed", data: "Internal Server Error" });
     }
+    if (!oldData) return res.send({ status: "failed", data: "Internal Server Error" });
+    studentCollection.updateOne(
+      { _id: ObjectId(_id) },
+      { $set: { profile, name, age, email, marks, city } },
+      (err) => {
+        if (err) return res.send({ status: "failed", data: err });
+        res.send({ status: "ok", data: "Student's data updated successfully" });
+        const oldImageName = oldData?.profile;
+        oldImageName &&
+          fs.unlink(`${__dirname}/userProfiles/${oldImageName}`, (error) => {
+            console.log(
+              !error ? (oldData, " deleted successfully") : ("delete error", error)
+            );
+          });
+      }
+    );
   });
 });
 

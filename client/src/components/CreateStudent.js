@@ -1,6 +1,8 @@
-import React, { useState, useEffect, useCallback } from "react";
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import axios from "axios";
 import { fetchStudentsData } from "../utils/fetchData";
+import { capitalizeFirstLetter } from "../utils/stringUtils";
 
 export default function CreateStudent(props) {
   const studentId = props.match.params.id;
@@ -10,7 +12,7 @@ export default function CreateStudent(props) {
     error: null,
   });
   const [uploadPercentage, setUploadPercentage] = useState("");
-  let profile;
+  const profileNode = useRef(null);
 
   const fetchStudent = useCallback(async () => {
     await fetchStudentsData(
@@ -24,7 +26,7 @@ export default function CreateStudent(props) {
 
   useEffect(() => {
     studentId && fetchStudent();
-  }, [studentId, fetchStudent]);
+  }, []);
 
   function isValid() {
     if (!student.data) return alert("Please fill all required fields.");
@@ -32,7 +34,8 @@ export default function CreateStudent(props) {
     for (let index = 0; index < fieldNames.length; index++) {
       const key = fieldNames[index];
       const value = student.data[key];
-      if (!value.trim()) return alert(`${key} can't be empty`);
+      if (!value.trim())
+        return alert(`${capitalizeFirstLetter(key)} can't be empty`);
     }
     submit();
   }
@@ -45,28 +48,24 @@ export default function CreateStudent(props) {
     formData.append("marks", student.data.marks);
     formData.append("age", student.data.age);
     formData.append("email", student.data.email);
-    formData.append("profile", profile);
+    formData.append("profile", profileNode.current.files[0]);
 
-    if (formData.get("profile") === "undefined") {
-      const studentObj = { id: studentId, ...student.data };
-      axios
-        .post(process.env.REACT_APP_API_URL + "/short-update", studentObj)
+    if (formData.get("profile") === "undefined")
+      return axios
+        .post(process.env.REACT_APP_API_URL + "/short-update", {
+          id: studentId,
+          ...student.data,
+        })
         .then((res) => alert(res.data.data))
         .catch((err) => console.log(err));
-      return false;
-    }
 
     axios
       .post(process.env.REACT_APP_API_URL + "/update-student", formData, {
         headers: { "Content-Type": "multipart/form-data" },
-        onUploadProgress: function (progressEvent) {
-          // console.log("file Uploading Progresss....... ", progressEvent);
+        onUploadProgress: (progressEvent) => {
           setUploadPercentage(
-            parseInt(
-              Math.round((progressEvent.loaded / progressEvent.total) * 100)
-            )
+            Math.round((progressEvent.loaded / progressEvent.total) * 100)
           );
-          //setfileInProgress(progressEvent.fileName)
         },
       })
       .then((res) => alert(res.data.data))
@@ -178,6 +177,7 @@ export default function CreateStudent(props) {
                     className="form-control"
                     id="inputCity"
                   >
+                    <option value="">Please select a city</option>
                     <option value="Jaipur">Jaipur</option>
                     <option value="Pune">Pune</option>
                     <option value="Mumbai">Mumbai</option>
@@ -193,9 +193,8 @@ export default function CreateStudent(props) {
                     <label htmlFor="profilePic">Profile Picture</label>
                     <input
                       name="profilePic"
-                      onChange={(e) => (profile = e.target.files[0])}
+                      ref={profileNode}
                       className="form-control"
-                      value={profile}
                       type="file"
                     />
                     {uploadPercentage && uploadPercentage + "% uploaded"}
