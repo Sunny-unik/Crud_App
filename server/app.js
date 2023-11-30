@@ -1,35 +1,36 @@
 const express = require("express");
 const cors = require("cors");
-const Mongoclient = require("mongodb").MongoClient;
+const MongoClient = require("mongodb").MongoClient;
 const ObjectId = require("mongodb").ObjectId;
-const bodyParser = require("body-parser");
 const upload = require("./multerConfig");
 const path = require("path");
 const fs = require("fs");
-require("dotenv").config();
 
+// app configurations
+require("dotenv").config();
 const app = express();
+const port = process.env.PORT || 4000;
+
+// middlewares
 app.use(cors());
+app.use(express.json());
 app.use(express.static(path.join(__dirname, "userProfiles")));
 
-const client = new Mongoclient(process.env.MONGO_URI, {
+// database connection
+let database;
+const client = new MongoClient(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
-let connection;
-
-client.connect((err, db) => {
-  if (!err) {
-    connection = db;
-    console.log("Database connected");
-  } else {
-    console.log("error in Db connection");
-  }
+client.connect((err, connection) => {
+  if (err) return console.log("Error in Db connection:", err);
+  database = connection.db("school");
+  console.log("Database connected");
 });
 
 app.get("/student-by-id", (req, res) => {
-  const studentcollection = connection.db("school").collection("student");
-  studentcollection.find({ _id: ObjectId(req.query.id) }).toArray((err, docs) => {
+  const studentCollection = database.collection("student");
+  studentCollection.find({ _id: ObjectId(req.query.id) }).toArray((err, docs) => {
     if (!err) {
       res.send({ status: "ok", data: docs });
     } else {
@@ -39,8 +40,8 @@ app.get("/student-by-id", (req, res) => {
 });
 
 app.get("/list-students", (req, res) => {
-  const studentcollection = connection.db("school").collection("student");
-  studentcollection.find().toArray((err, docs) => {
+  const studentCollection = database.collection("student");
+  studentCollection.find().toArray((err, docs) => {
     if (!err) {
       res.send({ status: "ok", data: docs });
     } else {
@@ -50,19 +51,19 @@ app.get("/list-students", (req, res) => {
 });
 
 app.get("/delete-student", (req, res) => {
-  const studentcollection = connection.db("school").collection("student");
-  studentcollection.remove({ _id: ObjectId(req.query.id) }, (err, result) => {
-    if (!err) {
-      res.send({ status: "ok", data: "Student's data deleted" });
-    } else {
-      res.send({ status: "failed", data: err });
-    }
+  const studentCollection = database.collection("student");
+  studentCollection.deleteOne({ _id: ObjectId(req.query.id) }, (err, result) => {
+    res.send(
+      !err
+        ? { status: "ok", data: "Student's data deleted" }
+        : { status: "failed", data: err }
+    );
   });
 });
 
-app.post("/create-student", bodyParser.json(), (req, res) => {
-  const studentcollection = connection.db("school").collection("student");
-  studentcollection.insert(req.body, (err, result) => {
+app.post("/create-student", (req, res) => {
+  const studentCollection = database.collection("student");
+  studentCollection.insertOne(req.body, (err, result) => {
     if (!err) {
       res.send({ status: "ok", data: "Student's data created successfully" });
     } else {
@@ -71,9 +72,9 @@ app.post("/create-student", bodyParser.json(), (req, res) => {
   });
 });
 
-app.post("/short-update", bodyParser.json(), (req, res) => {
-  const studentcollection = connection.db("school").collection("student");
-  studentcollection.updateOne(
+app.post("/short-update", (req, res) => {
+  const studentCollection = database.collection("student");
+  studentCollection.updateOne(
     { _id: ObjectId(req.body.id) },
     {
       $set: {
@@ -94,14 +95,14 @@ app.post("/short-update", bodyParser.json(), (req, res) => {
   );
 });
 
-app.post("/update-student", bodyParser.json(), (req, res) => {
+app.post("/update-student", (req, res) => {
   upload(req, res, async (err) => {
     if (!err) {
-      const studentcollection = connection.db("school").collection("student");
-      const oldData = await studentcollection.findOne({
+      const studentCollection = database.collection("student");
+      const oldData = await studentCollection.findOne({
         _id: ObjectId(req.body._id)
       });
-      studentcollection.updateOne(
+      studentCollection.updateOne(
         { _id: ObjectId(req.body._id) },
         {
           $set: {
@@ -134,7 +135,4 @@ app.post("/update-student", bodyParser.json(), (req, res) => {
   });
 });
 
-const port = process.env.PORT;
-app.listen(port, () => {
-  console.log(`Server live on http://localhost:${port}`);
-});
+app.listen(port, () => console.log(`Server live on http://localhost:${port}`));
