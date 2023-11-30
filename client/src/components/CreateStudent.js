@@ -70,7 +70,8 @@ export default function CreateStudent(props) {
       })
       .then((res) => alert(res.data.data))
       .catch((err) => {
-        alert("Sorry, server side error occurred");
+        const serverErrorMsg = err.response?.data?.data;
+        alert(serverErrorMsg ? serverErrorMsg : "Internal Server Error");
         console.log(err);
       });
   }

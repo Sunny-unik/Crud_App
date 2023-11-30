@@ -77,7 +77,11 @@ app.post("/short-update", (req, res) => {
 
 app.post("/update-student", (req, res) => {
   upload(req, res, async (err) => {
-    if (err) return res.status(503).send({ status: "failed", data: err });
+    if (err)
+      return res.send({
+        status: "failed",
+        data: err.storageErrors ? "Only jpg, png & jpeg extensions are allowed" : err
+      });
     const studentCollection = database.collection("student");
     const { _id, name, email, age, marks, city } = req.body;
     const profile = req.files.profile[0].filename;
