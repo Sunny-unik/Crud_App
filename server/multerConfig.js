@@ -1,21 +1,17 @@
 const multer = require("multer");
 const path = require("path");
 
-const storage = multer.diskStorage(
-  {
-    destination: (req, file, callback) => {
-      callback(null, "userprofiles");
-    },
-    filename: (req, file, cb) => {
-      const extension = path.extname(file.originalname);
-      console.log(
-        "Uploading " + file.fieldname.slice(0, 3) + "-" + Date.now() + extension
-      );
-      cb(null, file.fieldname.slice(0, 3) + "-" + Date.now() + extension);
-    },
+const storage = multer.diskStorage({
+  destination: (req, file, callback) => {
+    callback(null, "userProfiles");
+  },
+  filename: (req, file, cb) => {
+    const extension = path.extname(file.originalname);
+    const uniqueName = file.fieldname.slice(0, 3) + "-" + Date.now(); // pro-234763458969876.jpg
+    console.log("Uploading " + uniqueName + extension);
+    cb(null, uniqueName + extension);
   }
-  //   profile-234763458969876.jpg
-);
+});
 
 const multerOptions = {
   storage: storage,
@@ -30,7 +26,7 @@ const multerOptions = {
       }
       callback(null, true);
     }
-  },
+  }
 };
 
 const upload = multer(multerOptions).fields([{ name: "profile", maxCount: 1 }]);
