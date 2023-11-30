@@ -5,7 +5,7 @@ import { fetchStudentsData } from "../utils/fetchData";
 export default function CreateStudent(props) {
   const studentId = props.match.params.id;
   const [student, setStudent] = useState({
-    data: null,
+    data: { name: "", email: "", age: "", marks: "", city: "" },
     loading: true,
     error: null,
   });
@@ -27,25 +27,12 @@ export default function CreateStudent(props) {
   }, [studentId, fetchStudent]);
 
   function isValid() {
-    if (document.getElementById("inputName").value === "") {
-      alert("name can't be empty");
-      return false;
-    }
-    if (document.getElementById("inputEmail").value === "") {
-      alert("email can't be empty");
-      return false;
-    }
-    if (document.getElementById("inputAge").value === "") {
-      alert("age can't be empty");
-      return false;
-    }
-    if (document.getElementById("inputMarks").value === "") {
-      alert("marks can't be empty");
-      return false;
-    }
-    if (document.getElementById("inputCity").value === "") {
-      alert("city can't be empty");
-      return false;
+    if (!student.data) return alert("Please fill all required fields.");
+    const fieldNames = Object.keys(student.data);
+    for (let index = 0; index < fieldNames.length; index++) {
+      const key = fieldNames[index];
+      const value = student.data[key];
+      if (!value.trim()) return alert(`${key} can't be empty`);
     }
     submit();
   }
@@ -93,11 +80,8 @@ export default function CreateStudent(props) {
     if (studentId) return updateStudent();
     axios
       .post(process.env.REACT_APP_API_URL + "/create-student", student.data)
-      .then(() => alert("Student Created Successfully"))
-      .catch((err) => {
-        alert("Internal Server Error");
-        console.log(err);
-      });
+      .then(() => alert("Student Data Created Successfully"))
+      .catch(() => alert("Internal Server Error"));
   }
 
   return (
@@ -122,7 +106,7 @@ export default function CreateStudent(props) {
                         data: { ...student.data, name: e.target.value },
                       });
                     }}
-                    value={student.data?.name || ""}
+                    value={student.data.name}
                     className="form-control"
                     id="inputName"
                     type="text"
@@ -139,7 +123,7 @@ export default function CreateStudent(props) {
                         data: { ...student.data, email: e.target.value },
                       });
                     }}
-                    value={student.data?.email || ""}
+                    value={student.data.email}
                     className="form-control"
                     id="inputEmail"
                     type="email"
@@ -147,7 +131,7 @@ export default function CreateStudent(props) {
                   />
                 </div>
                 <div className="form-group mb-3">
-                  <label htmlFor="inputAge"> Age </label>
+                  <label htmlFor="inputAge">Age</label>
                   <input
                     name="age"
                     onChange={(e) => {
@@ -156,7 +140,7 @@ export default function CreateStudent(props) {
                         data: { ...student.data, age: e.target.value },
                       });
                     }}
-                    value={student.data?.age || ""}
+                    value={student.data.age}
                     className="form-control"
                     id="inputAge"
                     type="number"
@@ -173,7 +157,7 @@ export default function CreateStudent(props) {
                         data: { ...student.data, marks: e.target.value },
                       });
                     }}
-                    value={student.data?.marks || ""}
+                    value={student.data.marks}
                     className="form-control"
                     id="inputMarks"
                     type="number"
@@ -190,7 +174,7 @@ export default function CreateStudent(props) {
                         data: { ...student.data, city: e.target.value },
                       });
                     }}
-                    value={student.data?.city || ""}
+                    value={student.data.city}
                     className="form-control"
                     id="inputCity"
                   >
@@ -203,7 +187,7 @@ export default function CreateStudent(props) {
                 </div>
 
                 {!studentId ? (
-                  <hr />
+                  <></>
                 ) : (
                   <div className="form-group mb-3">
                     <label htmlFor="profilePic">Profile Picture</label>
