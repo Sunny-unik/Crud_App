@@ -30,7 +30,7 @@ client.connect((err, connection) => {
 
 app.get("/student-by-id", (req, res) => {
   const studentCollection = database.collection("student");
-  studentCollection.find({ _id: ObjectId(req.query.id) }).toArray((err, docs) => {
+  studentCollection.findOne({ _id: ObjectId(req.query.id) }, (err, docs) => {
     if (!err) {
       res.send({ status: "ok", data: docs });
     } else {

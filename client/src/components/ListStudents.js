@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import "../App.css";
+import { fetchStudentsData } from "../utils/fetchData";
 
 export default function ListStudents(props) {
   const [students, setStudents] = useState({
@@ -10,23 +11,10 @@ export default function ListStudents(props) {
   });
 
   const fetchStudents = useCallback(() => {
-    axios
-      .get(process.env.REACT_APP_API_URL + "/list-students")
-      .then((res) =>
-        setStudents((s) => {
-          return { ...s, data: res.data.data };
-        })
-      )
-      .catch((error) =>
-        setStudents((s) => {
-          return { ...s, error: error };
-        })
-      )
-      .finally(() =>
-        setStudents((s) => {
-          return { ...s, loading: false };
-        })
-      );
+    fetchStudentsData(
+      `${process.env.REACT_APP_API_URL}/list-students`,
+      setStudents
+    );
   }, []);
 
   useEffect(() => fetchStudents(), [fetchStudents]);

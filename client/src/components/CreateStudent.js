@@ -1,41 +1,30 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
+import { fetchStudentsData } from "../utils/fetchData";
 
 export default function CreateStudent(props) {
   const studentId = props.match.params.id;
-  const [name, setname] = useState("");
-  const [email, setemail] = useState("");
-  const [age, setage] = useState("");
-  const [marks, setmarks] = useState("");
-  const [city, setcity] = useState("");
-  const [uploadPercentage, setuploadPercentage] = useState("");
+  const [student, setStudent] = useState({
+    data: null,
+    loading: true,
+    error: null,
+  });
+  const [uploadPercentage, setUploadPercentage] = useState("");
   let profile;
 
+  const fetchStudent = useCallback(async () => {
+    await fetchStudentsData(
+      `${process.env.REACT_APP_API_URL}/student-by-id/?id=${studentId}`,
+      setStudent
+    );
+    if (student.error?.message !== "Invalid user Id") return false;
+    alert(student.error.message);
+    props.history.push("/");
+  }, []);
+
   useEffect(() => {
-    if (studentId) {
-      axios
-        .get(process.env.REACT_APP_API_URL + "/student-by-id/?id=" + studentId)
-        .then(res => {
-          setname(res.data.data[0].name);
-          setemail(res.data.data[0].email);
-          setage(res.data.data[0].age);
-          setmarks(res.data.data[0].marks);
-          setcity(res.data.data[0].city);
-        });
-    }
-  }, [studentId]);
-
-  function setvalue(e) {
-    e.target.name === "name" && setname(e.target.value);
-    e.target.name === "age" && setage(e.target.value);
-    e.target.name === "email" && setemail(e.target.value);
-    e.target.name === "marks" && setmarks(e.target.value);
-    e.target.name === "city" && setcity(e.target.value);
-  }
-
-  function setprofile(e) {
-    profile = e.target.files[0];
-  }
+    studentId && fetchStudent();
+  }, [studentId, fetchStudent]);
 
   function isValid() {
     if (document.getElementById("inputName").value === "") {
@@ -64,53 +53,49 @@ export default function CreateStudent(props) {
   function updateStudent() {
     const formData = new FormData();
     formData.append("_id", studentId);
-    formData.append("name", name);
-    formData.append("city", city);
-    formData.append("marks", marks);
-    formData.append("age", age);
-    formData.append("email", email);
+    formData.append("name", student.data.name);
+    formData.append("city", student.data.city);
+    formData.append("marks", student.data.marks);
+    formData.append("age", student.data.age);
+    formData.append("email", student.data.email);
     formData.append("profile", profile);
 
     if (formData.get("profile") === "undefined") {
-      const studentObj = { id: studentId, name, city, marks, age, email };
+      const studentObj = { id: studentId, ...student.data };
       axios
         .post(process.env.REACT_APP_API_URL + "/short-update", studentObj)
-        .then(res => console.log(res.data.data))
-        .catch(err => console.log(err));
+        .then((res) => alert(res.data.data))
+        .catch((err) => console.log(err));
       return false;
     }
 
     axios
       .post(process.env.REACT_APP_API_URL + "/update-student", formData, {
         headers: { "Content-Type": "multipart/form-data" },
-        onUploadProgress: function(progressEvent) {
+        onUploadProgress: function (progressEvent) {
           // console.log("file Uploading Progresss....... ", progressEvent);
-          setuploadPercentage(
+          setUploadPercentage(
             parseInt(
               Math.round((progressEvent.loaded / progressEvent.total) * 100)
             )
           );
           //setfileInProgress(progressEvent.fileName)
-        }
+        },
       })
-      .then(res => alert(res.data.data))
-      .catch(err => {
+      .then((res) => alert(res.data.data))
+      .catch((err) => {
         alert("Sorry, server side error occurred");
         console.log(err);
       });
   }
 
   function submit() {
-    if (studentId) {
-      updateStudent();
-      return false;
-    }
-    const studentObj = { name, age, email, marks, city };
+    if (studentId) return updateStudent();
     axios
-      .post(process.env.REACT_APP_API_URL + "/create-student", studentObj)
-      .then(res => alert("Student Created Successfully"))
-      .catch(err => {
-        alert(err);
+      .post(process.env.REACT_APP_API_URL + "/create-student", student.data)
+      .then(() => alert("Student Created Successfully"))
+      .catch((err) => {
+        alert("Internal Server Error");
         console.log(err);
       });
   }
@@ -130,11 +115,14 @@ export default function CreateStudent(props) {
                 <div className="form-group mb-3">
                   <label htmlFor="inputName">Name</label>
                   <input
-                    value={name}
                     name="name"
-                    onChange={e => {
-                      setvalue(e);
+                    onChange={(e) => {
+                      setStudent({
+                        ...student,
+                        data: { ...student.data, name: e.target.value },
+                      });
                     }}
+                    value={student.data?.name || ""}
                     className="form-control"
                     id="inputName"
                     type="text"
@@ -145,10 +133,13 @@ export default function CreateStudent(props) {
                   <label htmlFor="inputEmail">Email address</label>
                   <input
                     name="email"
-                    onChange={e => {
-                      setvalue(e);
+                    onChange={(e) => {
+                      setStudent({
+                        ...student,
+                        data: { ...student.data, email: e.target.value },
+                      });
                     }}
-                    value={email}
+                    value={student.data?.email || ""}
                     className="form-control"
                     id="inputEmail"
                     type="email"
@@ -159,11 +150,14 @@ export default function CreateStudent(props) {
                   <label htmlFor="inputAge"> Age </label>
                   <input
                     name="age"
-                    onChange={e => {
-                      setvalue(e);
+                    onChange={(e) => {
+                      setStudent({
+                        ...student,
+                        data: { ...student.data, age: e.target.value },
+                      });
                     }}
+                    value={student.data?.age || ""}
                     className="form-control"
-                    value={age}
                     id="inputAge"
                     type="number"
                     placeholder="Enter Student Age"
@@ -173,11 +167,14 @@ export default function CreateStudent(props) {
                   <label htmlFor="inputMarks">Marks</label>
                   <input
                     name="marks"
-                    onChange={e => {
-                      setvalue(e);
+                    onChange={(e) => {
+                      setStudent({
+                        ...student,
+                        data: { ...student.data, marks: e.target.value },
+                      });
                     }}
+                    value={student.data?.marks || ""}
                     className="form-control"
-                    value={marks}
                     id="inputMarks"
                     type="number"
                     placeholder="Enter Student Marks"
@@ -187,11 +184,14 @@ export default function CreateStudent(props) {
                   <label htmlFor="inputCity">City</label>
                   <select
                     name="city"
-                    onChange={e => {
-                      setvalue(e);
+                    onChange={(e) => {
+                      setStudent({
+                        ...student,
+                        data: { ...student.data, city: e.target.value },
+                      });
                     }}
+                    value={student.data?.city || ""}
                     className="form-control"
-                    value={city}
                     id="inputCity"
                   >
                     <option value="Jaipur">Jaipur</option>
@@ -206,10 +206,10 @@ export default function CreateStudent(props) {
                   <hr />
                 ) : (
                   <div className="form-group mb-3">
-                    <label htmlFor="profilepic">Profile Picture</label>
+                    <label htmlFor="profilePic">Profile Picture</label>
                     <input
-                      name="profilepic"
-                      onChange={e => setprofile(e)}
+                      name="profilePic"
+                      onChange={(e) => (profile = e.target.files[0])}
                       className="form-control"
                       value={profile}
                       type="file"
@@ -219,12 +219,7 @@ export default function CreateStudent(props) {
                 )}
 
                 <div className="d-flex align-items-center justify-content-center mt-4 mb-0">
-                  <span
-                    className="btn btn-primary"
-                    onClick={() => {
-                      studentId ? submit() : isValid();
-                    }}
-                  >
+                  <span className="btn btn-primary" onClick={() => isValid()}>
                     {studentId ? "Update Student" : "Create Student"}
                   </span>
                 </div>
