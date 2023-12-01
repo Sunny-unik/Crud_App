@@ -30,9 +30,7 @@ export default function CreateStudent(props) {
 
   function isValid() {
     if (!student.data) return alert("Please fill all required fields.");
-    const fieldNames = Object.keys(student.data);
-    for (let index = 0; index < fieldNames.length; index++) {
-      const key = fieldNames[index];
+    for (const key in student.data) {
       const value = student.data[key];
       if (!value.trim())
         return alert(`${capitalizeFirstLetter(key)} can't be empty`);

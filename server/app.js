@@ -11,6 +11,14 @@ require("dotenv").config();
 const app = express();
 const port = process.env.PORT || 4000;
 
+// check if userProfiles directory already exists or not
+try {
+  const profilesDir = "./userProfiles";
+  if (!fs.existsSync(profilesDir)) fs.mkdir(profilesDir, () => undefined);
+} catch (err) {
+  console.log(err);
+}
+
 // middlewares
 app.use(cors());
 app.use(express.json());
@@ -101,11 +109,17 @@ app.post("/update-student", (req, res) => {
         if (err) return res.send({ status: "failed", data: err });
         res.send({ status: "ok", data: "Student's data updated successfully" });
         const oldImageName = oldData?.profile;
+        const oldImagePath = `${__dirname}/userProfiles/${oldImageName}`;
         oldImageName &&
-          fs.unlink(`${__dirname}/userProfiles/${oldImageName}`, (error) => {
-            console.log(
-              !error ? (oldData, " deleted successfully") : ("delete error", error)
-            );
+          fs.stat(oldImagePath, (err, stats) => {
+            if (err || !stats) return console.log(err);
+            fs.unlink(oldImagePath, (error) => {
+              console.log(
+                !error
+                  ? "Old image deleted"
+                  : (`Error in delete ${oldImageName} image`, error)
+              );
+            });
           });
       }
     );
