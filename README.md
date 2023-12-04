@@ -1,72 +1,76 @@
+<div align="center">
+
 # Crud_App
 
-Webapp with crud operations built on top of MERN Stack
+> Webapp with crud operations built on top of **MERN** Stack
 
-### In this app user can create, update, list and delete student records
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/Sunny-unik/Crud_App)
 
-<br>
+</div>
 
-# For install depenecies
+## Description
 
-Firstly make sure node installed on your system after that run `npm install` inside client and server directory
+This app focused on implementing [**CRUD**](## "Create, Read, Update, Delete") operations. Users can create, update, list & delete student records.
 
-# On Client Side
+## For Setup
 
-## Setup .env
+### Prerequisites
 
-### - Client directory variables are:
+- Node installed on your machine.
+- MongoDB URI to connect with the Database.
+- Check the extensions.json file in the .vscode directory some of these extensions are required to maintain code consistency.
 
-&nbsp;&nbsp;&nbsp;REACT_APP_API_URL = your_server_url
+### Setup Environment Variables on client side
 
-## Getting Started with Create React App
+Create a file named `.env` paste following variables:
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+```env
+REACT_APP_API_URL=your_server_url
+```
 
-## Available Scripts
+### Install frontend dependencies
 
-In the project directory, you can run:
+Open a terminal in the project directory then run:
 
-### `npm start`
+```bash
+cd client
+npm i
+```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### Run development server for frontend
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Run the following command inside client directory:
 
-### `npm test`
+```bash
+npm start
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+this command serves frontend on [http://localhost:3000](http://localhost:3000)
 
-### `npm run build`
+### Setup Environment Variables on server side
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Create a file named `.env` paste following variables:
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```env
+MONGO_URI=your_mongodb_uri
+PORT=4000
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Install backend dependencies
 
-## Learn More
+Open another terminal in the project directory then run:
 
-You can learn more in the
-[Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```bash
+cd server
+npm i
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Run development server for backend
 
-# On Server Side
+Run the following command inside server directory:
 
-### - Create a folder give it name userProfiles it is require for store students profile images
+```bash
+npm run watch
+```
 
-### - Server directory variables are:
-
-&nbsp;&nbsp;&nbsp; MONGO_URI = mongodb_uri \
-&nbsp;&nbsp;&nbsp; PORT = port
-
-### - For start server
-
-&nbsp;&nbsp;&nbsp; You have to install sever side dependencies by running command `npm install` inside server directory
-\
-&nbsp;&nbsp;&nbsp; then run `npm run start` command for start server
+this command serves backend on [http://localhost:4000](http://localhost:4000)
