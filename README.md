@@ -74,3 +74,7 @@ npm run watch
 ```
 
 this command serves backend on [http://localhost:4000](http://localhost:4000)
+
+## ⚖️ LICENSE
+
+MIT © [Sunny-unik/Crud_App](LICENSE)
